@@ -277,13 +277,6 @@
             transform: translateY(0);
         }
 
-        .btn-login:disabled {
-            background: linear-gradient(135deg, #475569 0%, #334155 100%);
-            cursor: not-allowed;
-            box-shadow: none;
-            transform: translateY(0);
-        }
-
         @media (max-width: 480px) {
             body {
                 padding: 16px !important;
@@ -410,90 +403,330 @@
         initCanvas();
         drawParticles();
 
-        /* --- LOGIKA SISTEM LOGIN DENGAN GOOGLE SHEETS API --- */
-        let usersData = [];
-        const errorMessage = document.getElementById("errorMessage");
-        const loginBtn = document.querySelector('.btn-login');
-        const loginBtnText = loginBtn.querySelector('span');
 
-        // Fungsi untuk mengambil data dari Google Sheets
-        async function fetchGoogleSheetsData() {
-            // Spreadsheet ID dari link yang Anda berikan
-            const sheetId = "19tElLN5g4pE959E55tZpr6dGyg4q_bpJyYIN-iS_ZXs"; 
-            
-            // Endpoint Google Visualization API untuk format JSON
-            const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+        /* --- LOGIKA SISTEM LOGIN --- */
 
-            try {
-                // Nonaktifkan tombol login dan ubah teks saat proses loading
-                loginBtn.disabled = true;
-                loginBtnText.textContent = "MEMUAT DATA...";
-                errorMessage.style.display = "none";
-                
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const text = await response.text();
-                
-                // Response dari Google API dibungkus dengan function JS, kita ekstrak JSON-nya
-                // Potong prefix dan suffix untuk mendapatkan JSON murni
-                const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
-                
-                if (!jsonString) {
-                     throw new Error("Format respons tidak valid.");
-                }
+        // Data akun peserta (Telah ditambahkan properti 'kelas')
+        const usersData = [
+            // --- KELAS 7 ---
+            { nama: "AFIYA NAILA MUTI AZIZAH", user: "0136172077", pass: "2802", kelas: "7" },
+            { nama: "AIHAN KHASAN", user: "0144195691", pass: "2803", kelas: "7" },
+            { nama: "ALIKA AYUDIA KINANTHI KISMAJI", user: "0135701419", pass: "2804", kelas: "7" },
+            { nama: "AQILA ZAHRA", user: "0135353709", pass: "2859", kelas: "7" },
+            { nama: "ARJUNA PUTRA INDRAJAYA", user: "0146323296", pass: "2805", kelas: "7" },
+            { nama: "AYNA AYUNINDYA KEISYA", user: "0139020880", pass: "2806", kelas: "7" },
+            { nama: "DARRELL ALBY WIBOWO", user: "0136900394", pass: "2807", kelas: "7" },
+            { nama: "DEVINA ZIVAHRA QURROTA'AYUN", user: "0134244178", pass: "2808", kelas: "7" },
+            { nama: "FADHIL RAHMAD ADIPUTRA BASUKI", user: "0133061776", pass: "2809", kelas: "7" },
+            { nama: "FEBBY KHEISYA PUTRI", user: "0122803851", pass: "2810", kelas: "7" },
+            { nama: "GHAISAN AMSYAR AHZA", user: "3124908683", pass: "2811", kelas: "7" },
+            { nama: "HANIF NUR ATAHILLAH", user: "0136275709", pass: "2812", kelas: "7" },
+            { nama: "INDRA ARYANG SAPUTRA", user: "0127797134", pass: "2813", kelas: "7" },
+            { nama: "KAGENDRA PUTRA SANTOSO", user: "0149155011", pass: "2815", kelas: "7" },
+            { nama: "KANIYA ATTHAYA RAMADHANI", user: "0137518552", pass: "2816", kelas: "7" },
+            { nama: "KEITARO ANARGHYA LINUWIH", user: "0137692346", pass: "2817", kelas: "7" },
+            { nama: "KENZIE AUGUST KASTARA", user: "3144762748", pass: "2818", kelas: "7" },
+            { nama: "LITHA RAIDA FACHIRA", user: "0149900541", pass: "2819", kelas: "7" },
+            { nama: "MIKAYLA ANINDITA", user: "3133721982", pass: "2821", kelas: "7" },
+            { nama: "MUHAMMAD AMAR ANAFI", user: "0131837406", pass: "2822", kelas: "7" },
+            { nama: "MUHAMMAD ARKA RASENDRIYA KHARISMA", user: "0136320846", pass: "2820", kelas: "7" },
+            { nama: "MUHAMMAD AUFA SULAKSONO", user: "0147602064", pass: "2823", kelas: "7" },
+            { nama: "MUJI NURYANTO", user: "0138904408", pass: "2824", kelas: "7" },
+            { nama: "NABIL RIZKY ATAYA HAMZAH", user: "0133357686", pass: "2825", kelas: "7" },
+            { nama: "NAEEMA KEZIA SANTOSO", user: "0142232309", pass: "2826", kelas: "7" },
+            { nama: "RADEN MAS JUSUF MODO SOEWANDHI", user: "3146782664", pass: "2827", kelas: "7" },
+            { nama: "RAFFA DIMAS PRASETYO", user: "0134900378", pass: "2828", kelas: "7" },
+            { nama: "RIZKY AULIA MAHARDIKA", user: "0137804444", pass: "2829", kelas: "7" },
+            { nama: "SAFIN SUKANTIYO", user: "3135002064", pass: "2830", kelas: "7" },
+            { nama: "SATRIA WAHYU RAMADHAN", user: "0139359995", pass: "2831", kelas: "7" },
+            { nama: "SWIETENIA DYERA ARTA BESTARI", user: "3131834146", pass: "2901", kelas: "7" },
+            { nama: "ALFATIH FRIZI RAFSANJANY", user: "0137727934", pass: "2832", kelas: "7" },
+            { nama: "AYYASOFIA PUTRI HARWANTO", user: "0143055627", pass: "2833", kelas: "7" },
+            { nama: "EL-SYARAVI KURNIA RAMADANA", user: "0139222973", pass: "2834", kelas: "7" },
+            { nama: "ELISZA VIONITA SAPUTRA", user: "3146171891", pass: "2835", kelas: "7" },
+            { nama: "FADHIL KAMIL ABBAD", user: "0136626468", pass: "2836", kelas: "7" },
+            { nama: "FATHAN AL MAISAN ZHAFAR", user: "0145440318", pass: "2837", kelas: "7" },
+            { nama: "KARLA ARNETT AYASKARA", user: "0133792480", pass: "2838", kelas: "7" },
+            { nama: "KHALFANI ARKAN AQILA", user: "0133603743", pass: "2839", kelas: "7" },
+            { nama: "LIJAMI ROZUL NURFAUZI", user: "0111214312", pass: "2840", kelas: "7" },
+            { nama: "M ZIDAN ARRAHMAN", user: "0132297220", pass: "2849", kelas: "7" },
+            { nama: "MAHESWARA DAMAR WISANGGENI", user: "0138199547", pass: "2841", kelas: "7" },
+            { nama: "MARETTA AQILA FIDELYA", user: "0145500979", pass: "2842", kelas: "7" },
+            { nama: "MUHAMMAD DANISWARA", user: "0131414999", pass: "2843", kelas: "7" },
+            { nama: "MUHAMMAD DARREL ALFARIZKY", user: "0131921531", pass: "2844", kelas: "7" },
+            { nama: "MUHAMMAD DAVIN KAMAL", user: "3132565314", pass: "2845", kelas: "7" },
+            { nama: "MUHAMMAD FADLI SAPUTRA", user: "3135374425", pass: "2846", kelas: "7" },
+            { nama: "MUHAMMAD RESTU FADILATUL IKHSAN", user: "0134680284", pass: "2847", kelas: "7" },
+            { nama: "MUHAMMAD SAKHA ANDRE PRATAMA", user: "3131058527", pass: "2848", kelas: "7" },
+            { nama: "NABIL NAUFAL 'AZZAM", user: "0137476457", pass: "2850", kelas: "7" },
+            { nama: "RAISYA INKA WIBOWO", user: "3132865030", pass: "2851", kelas: "7" },
+            { nama: "TEGAR ADI PUTRA", user: "0132816925", pass: "2852", kelas: "7" },
+            { nama: "ZAHRA ASHYLA SAAFIA", user: "0147731368", pass: "2853", kelas: "7" },
+            { nama: "ABDURRAUF ALHAKIM", user: "3130447708", pass: "2854", kelas: "7" },
+            { nama: "ADITIYA RISKY SAPUTRA", user: "0143725559", pass: "2855", kelas: "7" },
+            { nama: "ALFIANO MAYSWARA", user: "0132808591", pass: "2856", kelas: "7" },
+            { nama: "ALINKA SAPARITA", user: "0145688890", pass: "2857", kelas: "7" },
+            { nama: "AMELIA ARDIANISASNI", user: "0136657600", pass: "2858", kelas: "7" },
+            { nama: "AWWALIYA NUURUSH SHOFAA", user: "0135446956", pass: "2860", kelas: "7" },
+            { nama: "AZIZ ZANUAR SAPUTRA", user: "3141894531", pass: "2861", kelas: "7" },
+            { nama: "DAFFA PUTRA PRADANA", user: "0134814765", pass: "2862", kelas: "7" },
+            { nama: "DIAN AYU PERMATA SARI", user: "0135681418", pass: "2963", kelas: "7" },
+            { nama: "FATHIR AHMAD AZZAMY", user: "0137393804", pass: "2864", kelas: "7" },
+            { nama: "FELISHA ASSYIFA PUTRI", user: "0141361453", pass: "2865", kelas: "7" },
+            { nama: "GHITSA MAYLIA PUTRI", user: "0135080621", pass: "2866", kelas: "7" },
+            { nama: "KAYRA ZAHIDAH AALIYAH ELY", user: "0124143874", pass: "2867", kelas: "7" },
+            { nama: "MIKE OVAN", user: "0131924308", pass: "2868", kelas: "7" },
+            { nama: "MUHAMAD ZIDANE SYATHIBI", user: "3137680186", pass: "2869", kelas: "7" },
+            { nama: "MUHAMMAD ARIEF TRIANTORO", user: "0145537371", pass: "2870", kelas: "7" },
+            { nama: "MUHAMMAD ARIF AL MUSYAFA", user: "3138733416", pass: "2871", kelas: "7" },
+            { nama: "NANDANA ZAKI PRANA", user: "0143106465", pass: "2872", kelas: "7" },
+            { nama: "NAZAM MAULANA SAPUTRA", user: "0136728612", pass: "2873", kelas: "7" },
+            { nama: "QUISHA NAZHIFA FAJRINISRINA", user: "3133223651", pass: "2874", kelas: "7" },
+            { nama: "RAFA RABBANI ADHA", user: "0129018906", pass: "2875", kelas: "7" },
+            { nama: "RAMA ADITYA ATHAYA", user: "0137663987", pass: "2876", kelas: "7" },
+            { nama: "ZAHWA NAFISYA HUMAILA", user: "0137784210", pass: "2877", kelas: "7" },
+            { nama: "ZUWITA DAHAYU NAURA EFENDI", user: "0138628044", pass: "2878", kelas: "7" },
+            { nama: "AMELIA SYAMSU ALAM", user: "3135725442", pass: "2879", kelas: "7" },
+            { nama: "ANGELINA SESYA PUSPITA", user: "0135412981", pass: "2880", kelas: "7" },
+            { nama: "ARIZKY RIAN PRATAMA", user: "0131271488", pass: "2881", kelas: "7" },
+            { nama: "ARJUNA AL GHIFARY", user: "0131148567", pass: "2882", kelas: "7" },
+            { nama: "ARSA RAFIF KALANI", user: "0133486233", pass: "2883", kelas: "7" },
+            { nama: "ARSANANDA IANIKA HANAPRATIWI", user: "0136781106", pass: "2884", kelas: "7" },
+            { nama: "AZRINA SIRIN AFRILIA", user: "0142869704", pass: "2885", kelas: "7" },
+            { nama: "CANDRA FAUZI AZIZ", user: "3139824842", pass: "2886", kelas: "7" },
+            { nama: "DANASTRI AZARIN NISMARA", user: "0132543088", pass: "2904", kelas: "7" },
+            { nama: "DZU ORLIN ARSEPTA", user: "0142663446", pass: "2887", kelas: "7" },
+            { nama: "FARIZ GHAISAN AKBAR", user: "0139303607", pass: "2888", kelas: "7" },
+            { nama: "KENZIE WAHYU ALIFIANO", user: "0132333064", pass: "2889", kelas: "7" },
+            { nama: "LUTHFAN MAKARIM", user: "0133018931", pass: "2890", kelas: "7" },
+            { nama: "M.AZKA RAYYANSYAH", user: "0133708829", pass: "2891", kelas: "7" },
+            { nama: "MUHAMMAD HAFIDZ ZAFRAN PASOLO", user: "0131618182", pass: "2892", kelas: "7" },
+            { nama: "MUHAMMADEENA RAISYA CANTIKA ZHAFIRA", user: "3143614734", pass: "2893", kelas: "7" },
+            { nama: "NABIYA FAUZIA SYABANNA", user: "0133291899", pass: "2894", kelas: "7" },
+            { nama: "NURIDA AZIZAH", user: "0142643417", pass: "2895", kelas: "7" },
+            { nama: "RAFARDHAN ATHALLA", user: "0131465294", pass: "2896", kelas: "7" },
+            { nama: "RAKA", user: "0111921034", pass: "2897", kelas: "7" },
+            { nama: "RASYA AUFA RAZAQ", user: "0137049965", pass: "2898", kelas: "7" },
+            { nama: "RUSYDAN HANIF PRATAMA", user: "0138897500", pass: "2899", kelas: "7" },
+            { nama: "SANDRIANA FABIAN SAFA SAPUTRA", user: "0139920472", pass: "2900", kelas: "7" },
+            { nama: "SYAFRINA DHEA RAMADHANI", user: "0125504037", pass: "2902", kelas: "7" },
 
-                const jsonData = JSON.parse(jsonString);
-                
-                // Validasi struktur data JSON dari Google
-                if (!jsonData.table || !jsonData.table.rows) {
-                     throw new Error("Struktur data tidak ditemukan di Spreadsheet.");
-                }
+            // --- KELAS 8 ---
+            { nama: "ANDREA QUEENETTA SYAKIRA", user: "0123683437", pass: "2698", kelas: "8" },
+            { nama: "ANTONIO LUCKY SADEWA", user: "0123109887", pass: "2699", kelas: "8" },
+            { nama: "ARSYFA MEISHAFIRA RAFIFAH HASNA", user: "0121433124", pass: "2704", kelas: "8" },
+            { nama: "AULIA SALSABILA", user: "0134319421", pass: "2705", kelas: "8" },
+            { nama: "AZKA ABDU RAZZAK HENDRATA", user: "0118961933", pass: "2707", kelas: "8" },
+            { nama: "AZZAHRA ALMAIRA HERSA PUTRI", user: "0131229202", pass: "2708", kelas: "8" },
+            { nama: "AZZAHRA SHAFA KUSUMA", user: "0118989024", pass: "2709", kelas: "8" },
+            { nama: "BIMA SAKTI SAPUTRA", user: "0123505225", pass: "2715", kelas: "8" },
+            { nama: "CAHAYA ASTRIVAH", user: "0126572361", pass: "2717", kelas: "8" },
+            { nama: "DEVARA KEVINO HENDRANINGRAT", user: "0138814601", pass: "2721", kelas: "8" },
+            { nama: "ELZIO FATHAN ALFARIZQY", user: "0134396921", pass: "2724", kelas: "8" },
+            { nama: "FIRMAN DARMAWAN", user: "0093811999", pass: "2731", kelas: "8" },
+            { nama: "HAAFIZH ASYAM ARTOMORO", user: "3128318301", pass: "2733", kelas: "8" },
+            { nama: "INDRA RIZKY FARDI", user: "3133451608", pass: "2737", kelas: "8" },
+            { nama: "KENZIE FABIAN BAHY", user: "0127436749", pass: "2741", kelas: "8" },
+            { nama: "LANAYA RINATA MAHARANI", user: "0131086316", pass: "2744", kelas: "8" },
+            { nama: "LUQMANUL HERDIAN PUTRA", user: "0128168130", pass: "2746", kelas: "8" },
+            { nama: "MAULANA AKBAR ALVINO", user: "0137873878", pass: "2750", kelas: "8" },
+            { nama: "MAZIZA MUTIA FARHANA", user: "0126877007", pass: "2751", kelas: "8" },
+            { nama: "MUHAMAD HAFIZ VIDRYANTO", user: "0125856818", pass: "2753", kelas: "8" },
+            { nama: "NAZIFA YUI OVITA ZAHRA", user: "0126954303", pass: "2766", kelas: "8" },
+            { nama: "QONITA DINA HENDRIKA", user: "0126986745", pass: "2770", kelas: "8" },
+            { nama: "REFALDO RIKO SAPUTRA", user: "0126345904", pass: "2775", kelas: "8" },
+            { nama: "SALSA OLIVIA HARISSA TIFFANY", user: "0131546161", pass: "2784", kelas: "8" },
+            { nama: "SASIKIRANA JACYNTA MAHESWARI", user: "0126586785", pass: "2785", kelas: "8" },
+            { nama: "SHALUM AMELIA SHUHADA", user: "3125258812", pass: "2786", kelas: "8" },
+            { nama: "SYARIFAH ANNISA SAFIRA ALATHAS", user: "0126911370", pass: "2787", kelas: "8" },
+            { nama: "ADNAN RISKI JULIYATNO", user: "0129901333", pass: "2691", kelas: "8" },
+            { nama: "ALGIS MAHENDRA DEAN", user: "0128392646", pass: "2694", kelas: "8" },
+            { nama: "ALVARO NAUFAL PUTRA", user: "0122608253", pass: "2696", kelas: "8" },
+            { nama: "ARDAIN FEBRIAN", user: "0131221253", pass: "2701", kelas: "8" },
+            { nama: "ARFA DHIAULHAQ", user: "0124445832", pass: "2702", kelas: "8" },
+            { nama: "ATTALASYAH VALENCIO PURWOKO", user: "0117315543", pass: "2792", kelas: "8" },
+            { nama: "AZ ZAHRA LATHIFA WIDODO", user: "3126671752", pass: "2706", kelas: "8" },
+            { nama: "BARRA ALFARITZI ILYAS MORIS", user: "3121260747", pass: "2712", kelas: "8" },
+            { nama: "DENI FEBRIAN PRATAMA", user: "0119269981", pass: "2720", kelas: "8" },
+            { nama: "FAEYZA REARDO PRATAMA", user: "0127672667", pass: "2794", kelas: "8" },
+            { nama: "FALIH RIZKI CAHYONO", user: "0121625509", pass: "2726", kelas: "8" },
+            { nama: "GHANI ALVARO ABYASA PUTRA", user: "0128501011", pass: "2732", kelas: "8" },
+            { nama: "HELMY AKMAL", user: "0126163289", pass: "2734", kelas: "8" },
+            { nama: "HURIYA ASIYA URFA", user: "0115706105", pass: "2735", kelas: "8" },
+            { nama: "JASMINE VALENCIA NUR CAHYO", user: "0128397461", pass: "2738", kelas: "8" },
+            { nama: "KANZHA ARVILIO CANNAVARO", user: "0133265565", pass: "2739", kelas: "8" },
+            { nama: "MIRZA AYDIN KAYANA", user: "0129398102", pass: "2797", kelas: "8" },
+            { nama: "MUHAMAD IQBAL SAPUTRA", user: "0139758603", pass: "2754", kelas: "8" },
+            { nama: "MUHAMMAD FATHURRAHMAN", user: "0107011105", pass: "2756", kelas: "8" },
+            { nama: "MUHAMMAD ROFI MAKRUF", user: "0129822164", pass: "2759", kelas: "8" },
+            { nama: "NADZAR WIJAYA", user: "0128667813", pass: "2764", kelas: "8" },
+            { nama: "OMAR FAQIH ASKHOLIL", user: "0137185989", pass: "2767", kelas: "8" },
+            { nama: "RAFANDRA AQLANDINOVHAN", user: "3134878430", pass: "2772", kelas: "8" },
+            { nama: "RATU AIKO", user: "0131052119", pass: "2773", kelas: "8" },
+            { nama: "RIFKY KURNIAWAN", user: "0125231491", pass: "2779", kelas: "8" },
+            { nama: "RISKI AHMAD WIBOWO", user: "0123608675", pass: "2780", kelas: "8" },
+            { nama: "SAJID RASYID AL AKABA", user: "3136864012", pass: "2783", kelas: "8" },
+            { nama: "ABHINAYA AVARA DANADYAKSA", user: "0123020916", pass: "2689", kelas: "8" },
+            { nama: "AGYUL THREE AFIQAH AZALIA KAMILA", user: "0139945872", pass: "2692", kelas: "8" },
+            { nama: "AL REZI SATRIA PRATAMA HAMZAH", user: "0127621825", pass: "2793", kelas: "8" },
+            { nama: "ALFAREZEL RAHANDIKA PRAHASTOMO", user: "3132937569", pass: "2693", kelas: "8" },
+            { nama: "ALZENA CHELSEA AISHANI MUHTAR", user: "3131062930", pass: "2697", kelas: "8" },
+            { nama: "AQILA SHAREEN NOURA PAMBUDI", user: "3132723386", pass: "2700", kelas: "8" },
+            { nama: "BENI LADU ALVIANO", user: "0102270721", pass: "2713", kelas: "8" },
+            { nama: "BILQIS ANNAYA MUMTHAZAH", user: "0132508375", pass: "2714", kelas: "8" },
+            { nama: "CELVIN NUR RAHMAN", user: "0128425959", pass: "2718", kelas: "8" },
+            { nama: "DAYINTA AJENG LISTYANI", user: "0121418041", pass: "2719", kelas: "8" },
+            { nama: "DZAKANUHA RAMADHAN HABIBI", user: "3122373786", pass: "2723", kelas: "8" },
+            { nama: "FEDRI KUSUMA WIJAYA", user: "0126173771", pass: "2729", kelas: "8" },
+            { nama: "ILHAMNUR ROHMAN", user: "0127264981", pass: "2736", kelas: "8" },
+            { nama: "MAHATIR BADRUS ZAMAN", user: "3117810788", pass: "2747", kelas: "8" },
+            { nama: "MAHENDRA RIZQHI YUSUF", user: "0121166595", pass: "2748", kelas: "8" },
+            { nama: "MAHEZA GALANG ARRAFFI", user: "0126537695", pass: "2749", kelas: "8" },
+            { nama: "MIKA AMELIA PUTRI", user: "0133880909", pass: "2752", kelas: "8" },
+            { nama: "MUHAMMAD KHEANU AFFANDIKA", user: "3113011920", pass: "2757", kelas: "8" },
+            { nama: "MUTIARANI ALIFIA", user: "0124780825", pass: "2761", kelas: "8" },
+            { nama: "PUAN KHEIDIRA NONIQU DURY", user: "0121810014", pass: "2769", kelas: "8" },
+            { nama: "RAFAEL YULIANTO", user: "0128141921", pass: "2771", kelas: "8" },
+            { nama: "REZA IMAM MUBAROK", user: "0108990484", pass: "2777", kelas: "8" },
+            { nama: "RICHY VALERIAN RADO MAHESWARA JAYA BUMI", user: "0097342168", pass: "2778", kelas: "8" },
+            { nama: "RIZKY PUTRA PRADHANA", user: "0108132181", pass: "2782", kelas: "8" },
+            { nama: "WIDYA ASSYIFA", user: "0121534937", pass: "2789", kelas: "8" },
+            { nama: "WILDAN AL GHIFARY", user: "0125691565", pass: "2790", kelas: "8" },
+            { nama: "ABIL ALBABILLY", user: "3122693309", pass: "2690", kelas: "8" },
+            { nama: "ALIKA LANGIT NOVALINDA ROINWAWAN", user: "3122128985", pass: "2695", kelas: "8" },
+            { nama: "AUF MALIQ MAHENDRA", user: "0121580894", pass: "2635", kelas: "8" },
+            { nama: "AZAHRA ZHEVANA DESTIYANI", user: "0127750022", pass: "2710", kelas: "8" },
+            { nama: "BAGUS RADITYA SUNANDAR", user: "0124093988", pass: "2711", kelas: "8" },
+            { nama: "BINTANG SYABANA KURNIA PUTRA", user: "3139162401", pass: "2716", kelas: "8" },
+            { nama: "BRIAN WAHYU HISYAM", user: "0123084192", pass: "2796", kelas: "8" },
+            { nama: "DHEA PUTRI AASIYAH", user: "0124453053", pass: "2722", kelas: "8" },
+            { nama: "FAHRI ASYARI", user: "0114000029", pass: "2725", kelas: "8" },
+            { nama: "FARAS ZAKY RAMADHAN", user: "0127628827", pass: "2727", kelas: "8" },
+            { nama: "FATIH DZAKI RAIHAN", user: "3123799886", pass: "2728", kelas: "8" },
+            { nama: "FILENDHA ADIVA SASSMARTHA", user: "0124877937", pass: "2730", kelas: "8" },
+            { nama: "KENZI AGASTYA WIDODO", user: "0121134271", pass: "2740", kelas: "8" },
+            { nama: "KHOIRUL AMRI", user: "0114002006", pass: "2742", kelas: "8" },
+            { nama: "KHOLIFATUN ISTIKHOMAH", user: "0107208521", pass: "2743", kelas: "8" },
+            { nama: "LILI MEILANI DHARA PUTRI", user: "0106127026", pass: "2745", kelas: "8" },
+            { nama: "MUHAMMAD DAFFA ALFARISY", user: "0111271201", pass: "2755", kelas: "8" },
+            { nama: "MUHAMMAD RAMADHANI DWI ARDIAN", user: "3119894579", pass: "2758", kelas: "8" },
+            { nama: "NADHIF EVAN FARDHANI", user: "0139277823", pass: "2762", kelas: "8" },
+            { nama: "NADIRA OKTAVIANA WAHYUNINGRUM", user: "0119877575", pass: "2763", kelas: "8" },
+            { nama: "NAFISAH JELITA ADRANI", user: "0106414559", pass: "2765", kelas: "8" },
+            { nama: "RAYZHAN SATYA ASMARA", user: "0127023082", pass: "2774", kelas: "8" },
+            { nama: "RENO FEBRIANTO", user: "0138181415", pass: "2776", kelas: "8" },
+            { nama: "RIZQI SAKA RAMADHAN", user: "0121546397", pass: "2781", kelas: "8" },
+            { nama: "VALEND BEYAN ANGGARA", user: "0135996867", pass: "2788", kelas: "8" },
+            { nama: "WILDAN ALWAN PUTRA", user: "0114160905", pass: "2791", kelas: "8" },
 
-                // Memetakan baris-baris spreadsheet ke format array objek JS
-                // Asumsi Urutan Kolom Google Sheets Anda:
-                // Index 0 (Kolom A) = Nama Lengkap
-                // Index 1 (Kolom B) = Username / NISN
-                // Index 2 (Kolom C) = Password / NIS
-                // Index 3 (Kolom D) = Kelas (7, 8, atau 9)
-                
-                usersData = jsonData.table.rows.map(row => ({
-                    nama: row.c[0] && row.c[0].v != null ? String(row.c[0].v) : "",
-                    user: row.c[1] && row.c[1].v != null ? String(row.c[1].v) : "",
-                    pass: row.c[2] && row.c[2].v != null ? String(row.c[2].v) : "",
-                    kelas: row.c[3] && row.c[3].v != null ? String(row.c[3].v) : ""
-                })).filter(u => u.user !== "" && !u.user.toLowerCase().includes("username")); 
-                // Filter baris kosong dan filter agar baris header (jika ada tulisan "username") diabaikan
-                
-                // Aktifkan kembali tombol setelah sukses
-                loginBtn.disabled = false;
-                loginBtnText.textContent = "LOGIN";
-                console.log(`Database siap! Berhasil memuat ${usersData.length} akun peserta.`);
-
-            } catch (error) {
-                console.error("Kesalahan Mengambil Data Google Sheets:", error);
-                
-                // Tampilkan pesan error yang informatif di layar login
-                errorMessage.innerHTML = `<strong>Koneksi ke Database Gagal!</strong><br>Pastikan link Google Sheet telah disetel <i>'Anyone with the link' (Siapa saja yang memiliki link)</i>.`;
-                errorMessage.style.display = "block";
-                
-                // Biarkan tombol disabled untuk mencegah login gagal
-                loginBtnText.textContent = "GAGAL MEMUAT DATA";
-                loginBtn.disabled = true; 
-            }
-        }
-
-        // Jalankan fetch otomatis saat halaman dibuka
-        fetchGoogleSheetsData();
-
+            // --- KELAS 9 ---
+            { nama: "ABRILIANA NAWITRI PRAWIRATAMA", user: "3123787099", pass: "2669", kelas: "9" },
+            { nama: "ALYA CARISSA PUTRI", user: "3121325236", pass: "2670", kelas: "9" },
+            { nama: "ANISA AULIA ZAHRA", user: "3114942210", pass: "2584", kelas: "9" },
+            { nama: "AZALIA NUR FITRIANA", user: "0119172320", pass: "2667", kelas: "9" },
+            { nama: "AZKIA RIZQITA RAMADHANI", user: "0117903302", pass: "2642", kelas: "9" },
+            { nama: "AZZAM SYAHPUTRA", user: "0118332833", pass: "2596", kelas: "9" },
+            { nama: "CHLARA LARASATI", user: "0122720042", pass: "2681", kelas: "9" },
+            { nama: "DELLORTO ALVARO ANANTA", user: "0112829090", pass: "2621", kelas: "9" },
+            { nama: "ELVINA ALYA MUKHBITA VIANTI", user: "0104184911", pass: "2590", kelas: "9" },
+            { nama: "FAJAR DWI WIJONARKO", user: "0117623177", pass: "2636", kelas: "9" },
+            { nama: "FARAHDHIBA", user: "0111809023", pass: "2628", kelas: "9" },
+            { nama: "JESINDA ALLICIA ANGELIN", user: "0108973393", pass: "2685", kelas: "9" },
+            { nama: "KENZIE DIMAS ALFARIZI PUTRASENO", user: "0116839451", pass: "2632", kelas: "9" },
+            { nama: "KEYLA AZ ZAHRA ALDILLA PUTRI", user: "0125140741", pass: "2661", kelas: "9" },
+            { nama: "MUHAMMAD RANGGA TAUFIQ ARDIANTO", user: "0113489308", pass: "2623", kelas: "9" },
+            { nama: "MUHAMMAD REYYAN JAZMI RAQIS", user: "0112152089", pass: "2687", kelas: "9" },
+            { nama: "NURI MAULIDA SAKINAH", user: "3128614923", pass: "2603", kelas: "9" },
+            { nama: "RASENDRIYA KAFI MUAZAM", user: "0121294355", pass: "2616", kelas: "9" },
+            { nama: "RIZQI MAULANA SYAHPUTRA", user: "0061193637", pass: "2629", kelas: "9" },
+            { nama: "TEGAR NARENDRA PUTRA", user: "0112012729", pass: "2659", kelas: "9" },
+            { nama: "V NINDA ELLEN LITUHAYU", user: "0118385355", pass: "2639", kelas: "9" },
+            { nama: "YUSUF FADIL RAMADHAN", user: "0127730286", pass: "2656", kelas: "9" },
+            { nama: "ZAHIRA CHERYL LAKSONO", user: "0125753976", pass: "2663", kelas: "9" },
+            { nama: "ACHMAD FA'IZ DAROINI", user: "0112885926", pass: "2618", kelas: "9" },
+            { nama: "AHMAD FATHI MUBAROK", user: "0116318764", pass: "2799", kelas: "9" },
+            { nama: "ALDO RADITYA SETYAWAN", user: "0097107722", pass: "2592", kelas: "9" },
+            { nama: "ALVARO YUDHA MAHESWARA", user: "0112930838", pass: "2634", kelas: "9" },
+            { nama: "ANINDITA AYRAA QUEEN NIRWANA", user: "0121640448", pass: "2605", kelas: "9" },
+            { nama: "DARU MAULANA", user: "3122541072", pass: "2672", kelas: "9" },
+            { nama: "FAKHRUN NISA", user: "0114445859", pass: "2649", kelas: "9" },
+            { nama: "FATHIN KHAIRY ABDURRAHMAN", user: "0111598178", pass: "2625", kelas: "9" },
+            { nama: "FEBRIAN DHARU SAPUTRA", user: "0113746006", pass: "2608", kelas: "9" },
+            { nama: "FEBY DEA PRATAMA", user: "0119622933", pass: "2582", kelas: "9" },
+            { nama: "GRACELLA NOVA AURELLIA", user: "0117257034", pass: "2607", kelas: "9" },
+            { nama: "HAFIDH FAWWAZ", user: "0115025382", pass: "2631", kelas: "9" },
+            { nama: "HANAN HAFID NURFALIH", user: "0112872390", pass: "2583", kelas: "9" },
+            { nama: "HELGA RATU ZHAFIRAH HS", user: "0112766059", pass: "2619", kelas: "9" },
+            { nama: "HILAL FARHAN ANUGRAH", user: "0112250100", pass: "2617", kelas: "9" },
+            { nama: "IKHTANIA EKA NUR SEPTYA", user: "0112950888", pass: "2638", kelas: "9" },
+            { nama: "KEVIN PUTRA HERLAMBANG", user: "0109582560", pass: "2678", kelas: "9" },
+            { nama: "LIONEL ASKAR RADHITYA", user: "0127201692", pass: "2680", kelas: "9" },
+            { nama: "MUHAMMAD FAIZ", user: "0113618419", pass: "2600", kelas: "9" },
+            { nama: "MUHAMMAD FAUZAN ILHAM", user: "0114659083", pass: "2641", kelas: "9" },
+            { nama: "PREDITA KAMALIA RENJANI", user: "3129216524", pass: "2662", kelas: "9" },
+            { nama: "PUTRI MIKYAL FUKAYNA UTOMO", user: "0118458207", pass: "2620", kelas: "9" },
+            { nama: "RAKABIMA", user: "0118008240", pass: "2673", kelas: "9" },
+            { nama: "RIZKY BINTANG HANA PUTRA", user: "0112470225", pass: "2626", kelas: "9" },
+            { nama: "SAKHA ADITYA DIWANGKARA", user: "0123694320", pass: "2801", kelas: "9" },
+            { nama: "SALSABILLA AZARIA CAHAYA DIANTONO", user: "0127500722", pass: "2615", kelas: "9" },
+            { nama: "SYIFA QANITA SARI", user: "0111317855", pass: "2643", kelas: "9" },
+            { nama: "ADYATMA ANGGORO PUTRO ARYUS", user: "0128380364", pass: "2581", kelas: "9" },
+            { nama: "ARDIYANSYAH AHMADUN SP", user: "0083340537", pass: "2679", kelas: "9" },
+            { nama: "ARFAN SATYA HARLINO", user: "0118101811", pass: "2587", kelas: "9" },
+            { nama: "ATHIFA DINDA MAJESTICA", user: "0119637300", pass: "2664", kelas: "9" },
+            { nama: "DAMAR NIDA", user: "0114923266", pass: "2676", kelas: "9" },
+            { nama: "DAVIQ ALIF MUNAWAR", user: "0117372707", pass: "2665", kelas: "9" },
+            { nama: "DESTA PUTRA WIJAYA", user: "0115794198", pass: "2601", kelas: "9" },
+            { nama: "DINDA NUR PRASTIWI", user: "0113662229", pass: "2613", kelas: "9" },
+            { nama: "FATIMA ZAHRA RAHMADINA", user: "0121487754", pass: "2671", kelas: "9" },
+            { nama: "FAUZAN AKBAR MAULANA", user: "0106392991", pass: "2795", kelas: "9" },
+            { nama: "FAVIANO HUGO ALFAROSSI", user: "3117435725", pass: "2903", kelas: "9" },
+            { nama: "ILHAM FAHLEVI", user: "0112920418", pass: "2597", kelas: "9" },
+            { nama: "ILHAM INDRA SAPUTRA", user: "0115304615", pass: "2800", kelas: "9" },
+            { nama: "MUHAMAD RAMADANI PAMUNGKAS", user: "0103724769", pass: "2595", kelas: "9" },
+            { nama: "MUHAMMAD ARKAN FATHURRAHMAN", user: "0114952093", pass: "2637", kelas: "9" },
+            { nama: "NAURA NUR FITRIA", user: "0115511884", pass: "2586", kelas: "9" },
+            { nama: "NIZAM ASNAWI", user: "0113291040", pass: "2660", kelas: "9" },
+            { nama: "NU'MA TSARWATI", user: "0107629875", pass: "2589", kelas: "9" },
+            { nama: "NUR RAHMAD SETIAWAN", user: "0113154883", pass: "2580", kelas: "9" },
+            { nama: "OVVALYNA WAHYU CHANTIKA", user: "0104873284", pass: "2602", kelas: "9" },
+            { nama: "RADEN MUHAMMAD DZAKI", user: "0118712128", pass: "2653", kelas: "9" },
+            { nama: "RAINAN ARKA KUSUMAWARDANI", user: "0118230151", pass: "2606", kelas: "9" },
+            { nama: "SAMARA RISTY BALQS", user: "3128180321", pass: "2647", kelas: "9" },
+            { nama: "YOHANA MAESYAROH", user: "0129373000", pass: "2666", kelas: "9" },
+            { nama: "YULI KARTIKA WIDAYATI", user: "0112986548", pass: "2657", kelas: "9" },
+            { nama: "ABDILA FAIZ NUGRAHA ALFARIDZI", user: "0115834411", pass: "2646", kelas: "9" },
+            { nama: "ALVIN AJI SATRIA", user: "0118480188", pass: "2578", kelas: "9" },
+            { nama: "ANGGI RAFID SETIAWAN", user: "3112685780", pass: "2655", kelas: "9" },
+            { nama: "ARUNA MAHARDIKA", user: "0116447378", pass: "2624", kelas: "9" },
+            { nama: "AZAHRA NAJWA ANGGRAENI", user: "0116674977", pass: "2610", kelas: "9" },
+            { nama: "AZRA BUSSAINA FAKHIRA PRASWAYUNDYA", user: "0126271281", pass: "2654", kelas: "9" },
+            { nama: "BENING ANDHARU WIBOWO", user: "0128428572", pass: "2614", kelas: "9" },
+            { nama: "CHE THAH WENING AZ-ZAHRA", user: "0112136069", pass: "2648", kelas: "9" },
+            { nama: "DIMAS IKMAL RAMADHAN", user: "0111242406", pass: "2622", kelas: "9" },
+            { nama: "FARELL EKA FREVIANO", user: "3116164908", pass: "2630", kelas: "9" },
+            { nama: "HAIKAL TRIYAGA WIRATAMA", user: "0118417262", pass: "2652", kelas: "9" },
+            { nama: "ISHLAH ABDAN SYAKURA", user: "0099801515", pass: "2604", kelas: "9" },
+            { nama: "KALISA PUTRI ANGGRAINI", user: "0115913725", pass: "2585", kelas: "9" },
+            { nama: "KELVIN RAFKA ALVARO", user: "0116461602", pass: "2611", kelas: "9" },
+            { nama: "MARVIN ERIE ARDIANTO", user: "0117410961", pass: "2677", kelas: "9" },
+            { nama: "MUHAMMAD FARRAS NAUFAL", user: "0123366027", pass: "2599", kelas: "9" },
+            { nama: "MUHAMMAD FATAN ANWARRULHAQ", user: "0113853221", pass: "2645", kelas: "9" },
+            { nama: "MUHAMMAD RAQIB NUR IHSAN", user: "0111460895", pass: "2627", kelas: "9" },
+            { nama: "MUHAMMAD ZACKY SAPUTRA", user: "0124699445", pass: "2598", kelas: "9" },
+            { nama: "NADIA VANESHA BELLA", user: "0116915294", pass: "2612", kelas: "9" },
+            { nama: "NASYWA PUTRI SYAHIDAH", user: "0094380940", pass: "2609", kelas: "9" },
+            { nama: "SHAFIYYAH", user: "0099788848", pass: "2593", kelas: "9" },
+            { nama: "VELIA NAURA ANJANI", user: "0129180004", pass: "2658", kelas: "9" },
+            { nama: "VINANDIA PUTRI ANDANI", user: "0113494803", pass: "2668", kelas: "9" },
+            { nama: "VINO ANDRIAN RAMADHANI", user: "0111235359", pass: "2579", kelas: "9" }
+        ];
 
         const togglePasswordBtn = document.getElementById("togglePassword");
         const passwordInput = document.getElementById("password");
         const eyeIcon = document.getElementById("eyeIcon");
         const loginForm = document.getElementById("loginForm");
+        const errorMessage = document.getElementById("errorMessage");
 
         // Toggle Password Visibility
         togglePasswordBtn.addEventListener("click", () => {
@@ -509,43 +742,32 @@
             );
         });
 
-        // Event Login & Validasi dari Array Database Google Sheet
+        // Event Login & Redirect berdasarkan Kelas
         loginForm.addEventListener("submit", (e) => {
             e.preventDefault();
             errorMessage.style.display = "none";
 
-            // Pencegahan jika data belum ter-load (misal tombol login diakali lewat inspect element)
-            if (usersData.length === 0) {
-                errorMessage.textContent = "Data belum siap, silakan refresh halaman (F5).";
-                errorMessage.style.display = "block";
-                return;
-            }
-
-            // Ambil input dan bersihkan spasi ekstra
             const usernameInput = document.getElementById("username").value.trim();
             const passwordInputValue = passwordInput.value.trim();
 
-            // Cek kecocokan di database
             const foundUser = usersData.find(
                 (u) => u.user === usernameInput && u.pass === passwordInputValue
             );
 
             if (foundUser) {
-                // Simpan nama (bisa digunakan untuk menyapa user di halaman ujian nanti)
+                // Simpan nama agar tetap bisa dimunculkan di halaman selanjutnya
                 sessionStorage.setItem("userNama", foundUser.nama);
                 
-                // Redirect otomatis berdasarkan data kelas dari kolom D Spreadsheet
-                const kelas = String(foundUser.kelas).trim();
-                
-                if (kelas === "7") {
-                    window.location.href = "https://ekosantoso411-pixel.github.io/kelas-7/";
-                } else if (kelas === "8") {
-                    window.location.href = "https://ekosantoso411-pixel.github.io/kelas-8/";
-                } else if (kelas === "9") {
-                    window.location.href = "https://ekosantoso411-pixel.github.io/kelas-9/";
+                // --- LOGIKA REDIRECT BERDASARKAN KELAS ---
+                if (foundUser.kelas === "7") {
+                    window.location.href = "https://cbtsmpmuh2depok.blogspot.com/2025/09/jadwal-kelas-7.html";
+                } else if (foundUser.kelas === "8") {
+                    window.location.href = "https://cbtsmpmuh2depok.blogspot.com/2025/09/jadwal-kelas-8.html";
+                } else if (foundUser.kelas === "9") {
+                    window.location.href = "https://cbtsmpmuh2depok.blogspot.com/2025/09/jadwal-kelas-9.html";
                 } else {
-                    // Jika data kelas kosong atau aneh, lempar kembali
-                    window.location.href = "https://ekosantoso411-pixel.github.io/halaman-login/";
+                    // Fallback URL jika suatu saat ada akun yang tidak punya data kelas
+                    window.location.href = "https://cbtsmpmuh2depok.blogspot.com/2025/09/kelas.html";
                 }
 
             } else {
